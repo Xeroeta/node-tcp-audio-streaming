@@ -19,6 +19,9 @@ app.use(express.static(options.root));
 /** All ws clients */
 var wsClients = [];
 
+/** All ws clients */
+var tcpStreams = [];
+
 /**
  * Send index.html over http
  */
@@ -42,6 +45,7 @@ var tcpServer = net.createServer(function(socket) {
         console.log('Init first packet', firstPacket.length);
         firstPacket.push(data); 
       }
+      console.log('Packet Data Length: ', data.length);
 
       /**
        * Send stream to all clients
@@ -63,6 +67,8 @@ var wsServer = new WebSocketServer({
 
 wsServer.on('request', function(request) {
   var connection = request.accept('echo-protocol', request.origin);
+  console.log('request: ');
+//  console.log(request);
   console.log((new Date()) + ' Connection accepted.');
 
   if(firstPacket.length){

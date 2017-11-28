@@ -16,6 +16,6 @@
   },
   "dependencies": {
     "express": "^4.14.0",
-    "websocket": "^1.0.23"
+    "websocket": "^1.0.25"
   }
 }

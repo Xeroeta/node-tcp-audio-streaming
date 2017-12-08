@@ -7,6 +7,8 @@ const ffmpeg = require('fluent-ffmpeg');
 const mime = require('mime-types');
 const stream = require('stream');
 
+const log = (...args) => console.log(...args);
+
 // get sha256 in hex string
 const hash = string => {
   const f = crypto.createHash('sha256');
@@ -17,9 +19,10 @@ const hash = string => {
 
 // encoder preset
 const preset = (source, encoding) => {
-  return ffmpeg(source)
+  return ffmpeg( {source: source, logger: {debug: log, info: log, warn: log, error: log}})
     .native()
-    .format(encoding.format)
+//    .format(encoding.format)
+.format('flv')
     .audioBitrate(encoding.bitrate)
     .inputOptions(encoding.inputOptions)
     .outputOptions(encoding.outputOptions);
@@ -49,6 +52,8 @@ class Stream {
     this.output = null;
     this.connections = 0;
 
+    console.log("Inside Stream constructor!!!");
+    
     this.initialise();
   }
 
@@ -57,7 +62,13 @@ class Stream {
     this.encoder.on('start', 
       command => console.log(`Initialising '${this.name}' to '${this.source}'`)
     );
-    this.encoder.on('error', this.initialise.bind(this));
+    this.encoder.on('progress', function(progress) {
+        console.log('Processing: ' + progress.percent + '% done @ ' + progress.currentFps + ' fps');
+    });
+    this.encoder.on('error', function(err) {
+        console.log('An error occurred: ' + err.message);
+      }); //& this.initialise.bind(this)
+    
     this.encoder.on('end', this.initialise.bind(this));
 
     if (this.output) this.output.end();
@@ -105,9 +116,13 @@ class Stream {
 class Manager {
   constructor (config) {
     this.streams = {};
+    this.stream_keys = [];
+    this.stream_configs = {};
 
     for (let stream of config.streams || []) {
       this.streams[hash(stream.source)] = new Stream(stream, config.encoding);
+      this.stream_keys.push(hash(stream.source));
+      this.stream_configs[hash(stream.source)] = stream;
     }
   }
 

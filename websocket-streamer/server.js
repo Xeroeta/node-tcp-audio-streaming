@@ -2,6 +2,14 @@
 
 const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
+const hash = string => {
+  const f = crypto.createHash('sha256');
+
+  f.update(string);
+  return f.digest('hex')
+}
+
 
 
 //var express = require('express');
@@ -50,17 +58,31 @@ class Server {
 //      request.on('close', next);
 //
 //      manager.streams[request.params.uid].connect();
-      console.log("Connecting Stream");
-      manager.streams[Object.keys(manager.streams)[0]].connect();
-      console.log("Piping response");
-//      manager.streams[1].pipe(response);
-      var output_tcp_socket = new net.Socket({
-                        allowHalfOpen: true,
-                        readable: true,
-                        writable: true
-                        });
-      output_tcp_socket.connect('9090', 'localhost', function (){ console.log("Connection established via tcp stream"); });
-      manager.streams[Object.keys(manager.streams)[0]].pipe(output_tcp_socket);
+      var output_tcp_socket = null;
+      for(let i=0;i<manager.stream_keys.length;i++)
+      {
+        manager.streams[manager.stream_keys[i]].connect();
+            output_tcp_socket = new net.Socket({
+                          allowHalfOpen: true,
+                          readable: true,
+                          writable: true
+                          });
+        
+        output_tcp_socket.connect(manager.stream_configs[manager.stream_keys[i]].tcpPort, 'localhost', function (){ console.log("Connection established via tcp stream"); });
+        manager.streams[manager.stream_keys[i]].pipe(output_tcp_socket);
+          
+      }
+//      console.log("Connecting Stream");
+//      manager.streams[Object.keys(manager.streams)[0]].connect();
+//      console.log("Piping response");
+////      manager.streams[1].pipe(response);
+//      var output_tcp_socket = new net.Socket({
+//                        allowHalfOpen: true,
+//                        readable: true,
+//                        writable: true
+//                        });
+//      output_tcp_socket.connect('9090', 'localhost', function (){ console.log("Connection established via tcp stream"); });
+//      manager.streams[Object.keys(manager.streams)[0]].pipe(output_tcp_socket);
 //      manager.streams[request.params.uid].pipe(response);
 //    }, (request, response) => {
 //      manager.streams[request.params.uid].disconnect();

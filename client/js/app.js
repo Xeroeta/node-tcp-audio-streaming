@@ -1,4 +1,12 @@
-(function(){
+
+// alternative to load event
+document.onreadystatechange = function () {
+  if (document.readyState === "complete") {
+    initApplication();
+  }
+}
+
+function initApplication(){
 'use strict';
 
 var codecString = '';
@@ -6,8 +14,8 @@ var codecString = '';
  *  Set to whatever codec you are using
  */
 
-// codecString = 'audio/mp4; codecs="mp4a.67"';
- codecString = 'audio/mp4; codecs="mp4a.40.2"';
+ codecString = 'audio/mp4; codecs="mp4a.67"';
+// codecString = 'video/mp2t; codecs="avc1.42E01E,mp4a.40.2"';
 //codecString = 'video/webm; codecs="vp8"';
 // codecString = 'audio/mp3';
 
@@ -47,13 +55,24 @@ function sourceBufferHandle(){
         updateBuffer();
     });
 
+    wait(1000); 
     initWS();
 }
 
-mediaSource.addEventListener('sourceopen', sourceBufferHandle)
+function wait(ms){
+   var start = new Date().getTime();
+   var end = start;
+   while(end < start + ms) {
+     end = new Date().getTime();
+  }
+}
+var messages_counter = 0;
+var messages_log_limit = 100;
+var messages_log_flag = true;
+mediaSource.addEventListener('sourceopen', sourceBufferHandle);
 
 function initWS(){
-    var ws = new WebSocket('ws://' + window.location.hostname + ':' + window.location.port, 'echo-protocol');
+    var ws = new WebSocket('ws://' + window.location.hostname + ':' + window.location.port+'/channel/f7f3b8e344c07ea2a6fbb0e011326f0e78234a36694c783a5b7afa4887f20cdf?param=12345', 'echo-protocol');
     ws.binaryType = "arraybuffer";
 
     ws.onopen = function(){
@@ -61,18 +80,25 @@ function initWS(){
     };
 
     ws.onmessage = function (event) {
-        console.info('Recived WS message.', event);
-
+        
+        messages_log_flag && console.info('Recived WS message.', event);
+        
+        messages_counter+=1;
+        if(messages_log_limit<messages_counter)
+        {
+            messages_log_flag = false;
+        }
         if(typeof event.data === 'object'){
-            if (buffer.updating || queue.length > 0) {
-                console.info('Pushing to Queue');
+            messages_log_flag && console.log('State: '+mediaSource.readyState + ' :');
+            if (mediaSource.readyState != 'open' || buffer.updating || queue.length > 0) {
+                messages_log_flag && console.info('Media source is not open or buffering ' + buffer.updating + ' - Pushing to Queue');
                 queue.push(event.data);
             } else {
-                console.info('Appending buffer');
+                messages_log_flag && console.info('Appending buffer');
                 buffer.appendBuffer(event.data);
-                console.info('Now Play audio!!!!');
+                messages_log_flag && console.info('Now Play audio!!!!');
                 video.play();
-                console.info('After Play audio!!!!');
+                messages_log_flag && console.info('After Play audio!!!!');
             }
         }
     };
@@ -84,4 +110,4 @@ function initWS(){
 }
 
 
-})();
+};

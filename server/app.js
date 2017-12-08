@@ -2,6 +2,8 @@ var http = require('http');
 var net = require('net');
 var path = require('path');
 var express = require('express');
+const crypto = require('crypto');
+
 var app = express();
 var WebSocketServer = require('websocket').server;
 
@@ -12,6 +14,33 @@ var options = {
     httpPort: 8080,
     tcpPort: 9090
 };
+
+/** All Channels first  packets buffer */
+var channelFirstPacket = [];
+
+/** All Channel ws clients */
+var channelWsClients = [];
+
+
+// get the config
+const file = path.resolve(process.argv[2]); // arg to absolute path
+const config = require(file); // merge config file
+
+// get sha256 in hex string
+const hash = string => {
+  const f = crypto.createHash('sha256');
+
+  f.update(string);
+  return f.digest('hex')
+}
+
+var stream_configs = config.manager.streams;
+
+for(let i=0;i<stream_configs.length;i++)
+{
+    channelWsClients[hash(stream_configs[i].source)]=[];
+    channelFirstPacket[hash(stream_configs[i].source)] = [];
+}
 
 // Send static files with express
 app.use(express.static(options.root)); 
@@ -59,6 +88,32 @@ var tcpServer = net.createServer(function(socket) {
 tcpServer.listen(options.tcpPort, 'localhost');
 
 
+var listnerTcpServer = null;
+/** TCP Servers */
+for(let i=0;i<stream_configs.length;i++)
+{
+    /** TCP server */
+    listnerTcpServer = net.createServer(function(socket) {
+        socket.on('data', function(data){
+          if(channelFirstPacket[hash(stream_configs[i].source)].length < 3){
+    //        console.log('Init first packet', firstPacket.length);
+            channelFirstPacket[hash(stream_configs[i].source)].push(data); 
+          }
+//          console.log('Packet received on - '+stream_configs[i].name+' Data Length: ', data.length);
+
+          /**
+           * Send stream to all clients connected to this stream/channel
+           */
+          channelWsClients[hash(stream_configs[i].source)].map(function(client, index){
+            client.sendBytes(data);
+          });
+        });
+    });
+
+    listnerTcpServer.listen(stream_configs[i].tcpPort, 'localhost');
+//    console.log("Listening to stream/channel:  "+stream_configs[i].name);
+}
+
 /** Websocet */
 var wsServer = new WebSocketServer({
     httpServer: server,
@@ -67,24 +122,32 @@ var wsServer = new WebSocketServer({
 
 wsServer.on('request', function(request) {
   var connection = request.accept('echo-protocol', request.origin);
-  console.log('request: ');
-//  console.log(request);
+//  console.log('request: ');
+//  console.log(request.httpRequest.url);
+  let url = require('url').parse(request.httpRequest.url);
+//  console.log(url);
+  let token = url.pathname.substring(9);
+//  console.log('token:');
+  console.log(token);
+  let selected_channel = token;
   console.log((new Date()) + ' Connection accepted.');
 
-  if(firstPacket.length){
+//  var selected_channel = hash("http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1_mf_q"); //testing only
+//  console.log(selected_channel);
+  if(channelFirstPacket[selected_channel].length){
     /**
      * Every user will get beginnig of stream 
     **/ 
-    firstPacket.map(function(packet, index){
+    channelFirstPacket[selected_channel].map(function(packet, index){
       connection.sendBytes(packet); 
     });
     
   }
-    
+  
   /**
    * Add this user to collection
    */
-  wsClients.push(connection);
+  channelWsClients[selected_channel].push(connection);
 
   connection.on('close', function(reasonCode, description) {
       console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');

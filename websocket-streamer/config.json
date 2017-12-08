@@ -9,39 +9,48 @@
     "streams": [
       {
         "name": "BBC Radio 1",
-        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1_mf_q"
+        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1_mf_q",
+        "tcpPort": "9091"
       },
       {
         "name": "BBC Radio 2",
-        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio2_mf_p"
+        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio2_mf_p",
+        "tcpPort": "9092"
       },
       {
         "name": "BBC Radio 3",
-        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio3_mf_p"
+        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio3_mf_p",
+        "tcpPort": "9093"
       },
       {
         "name": "BBC Radio 4",
-        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4fm_mf_p"
+        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4fm_mf_p",
+        "tcpPort": "9094"
       },
       {
         "name": "BBC Radio 4 Extra",
-        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4extra_mf_p"
+        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4extra_mf_p",
+        "tcpPort": "9095"
       },
       {
         "name": "BBC Radio 5 Live",
-        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio5live_mf_q"
+        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio5live_mf_q",
+        "tcpPort": "9096"
       },
       {
         "name": "BBC Radio 5 Live Sports Extra",
-        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio5live_mf_p"
+        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio5live_mf_p",
+        "tcpPort": "9097"
       },
       {
         "name": "BBC Radio 6 Music",
-        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_6music_mf_q"
+        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_6music_mf_q",
+        "tcpPort": "9098"
       },
       {
         "name": "BBC Radio World Service",
-        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcwssc_mp1_ws-einws"
+        "source": "http://bbcmedia.ic.llnwd.net/stream/bbcwssc_mp1_ws-einws",
+        "tcpPort": "9099"
       }
     ]
   },

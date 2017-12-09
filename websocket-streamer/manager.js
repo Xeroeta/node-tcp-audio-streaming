@@ -63,7 +63,7 @@ class Stream {
       command => console.log(`Initialising '${this.name}' to '${this.source}'`)
     );
     this.encoder.on('progress', function(progress) {
-        console.log('Processing: ' + progress.percent + '% done @ ' + progress.currentFps + ' fps');
+//        console.log('Processing: ' + progress.percent + '% done @ ' + progress.currentFps + ' fps');
     });
     this.encoder.on('error', function(err) {
         console.log('An error occurred: ' + err.message);

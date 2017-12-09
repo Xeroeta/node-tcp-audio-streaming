@@ -2,76 +2,11 @@
   'use strict';
 
 
-mediaSource = new MediaSource();
-audio = new window.Audio(window.URL.createObjectURL(mediaSource));
-buffer = null;
-queue = [];
-
-  class MediaSourceHandler {
-      
-    constructor (uid) {
-      
-      this.codecString = 'audio/mp4; codecs="mp4a.67"';
-      this.audio = null;
-      
-//      this.audio = document.getElementById('audio');
-//      this.audio.src = window.URL.createObjectURL(this.mediaSource);
-      this.bufferArray = [];
-      this.currentUid = uid;
-    }
-
-    updateBuffer() {
-        if (this.queue.length > 0 && !this.buffer.updating) {
-            this.buffer.appendBuffer(this.queue.shift());
-        }
-    }
-
-    initWS(uid) {
-      console.log('initialising web socket for - ' + uid);
-      var ws = new WebSocket('ws://' + window.location.hostname + ':' + 
-              window.location.port + '/channel/'+uid, 'echo-protocol');
-      ws.binaryType = "arraybuffer";
-
-      ws.onopen = function(){
-          console.info('WebSocket connection initialized');
-      };
-
-      ws.onmessage = function (event) {
-          console.info('Recived WS message.', event);
-
-          if(typeof event.data === 'object'){
-              if (this.buffer.updating || this.queue.length > 0) {
-                  this.queue.push(event.data);
-              } else {
-                  this.buffer.appendBuffer(event.data);
-                  this.audio.play();
-              }
-          }
-      };
-      ws.onclose = function(){ console.info('WebSocket connection closed') }
-    }
-
-    sourceBufferHandle() {
-        console.log("Handling source buffer" + this.currentUid);
-        this.buffer = mediaSource.addSourceBuffer(this.codecString);
-        this.buffer.mode = 'sequence';
-
-        console.log('adding sourceBufferHandle');
-        buffer.addEventListener('update', function() { // Note: Have tried 'updateend'
-            console.log('update');
-            this.updateBuffer();
-        });
-
-        buffer.addEventListener('updateend', function() {
-            console.log('updateend');
-            this.updateBuffer();
-        });
-
-        this.initWS(this.currentUid);
-    }
-
-  }
-
+//var mediaSource = new MediaSource();
+//var audio = new window.Audio(window.URL.createObjectURL(mediaSource));
+//var buffer = null;
+//var queue = [];
+//var codecString = 'audio/mp4; codecs="mp4a.67"';
 
   // manages the stream audio
   class Player {
@@ -82,20 +17,99 @@ queue = [];
       this.queue = [];
       this.bufferArray = [];
       this.currentUid = null;
+      /** WebSocket */
+      this.ws = null;
+      
+      this.codecString = 'audio/mp4; codecs="mp4a.67"';      
+      this.mediaSource = new MediaSource();
+      this.audio = new window.Audio(window.URL.createObjectURL(this.mediaSource));
+//      this.audio = document.getElementById('audio');
+//      this.audio.src = window.URL.createObjectURL(this.mediaSource);
+
+      /** Functions binding */
+      this.updateBuffer = this.updateBuffer.bind(this);
+      this.initWS = this.initWS.bind(this);
+      this.closeWS = this.closeWS.bind(this);
+      this.sourceBufferHandle = this.sourceBufferHandle.bind(this);
+      this.play = this.play.bind(this);
+      this.stop = this.stop.bind(this);
+      
+    }
+
+    updateBuffer() {
+        if (this.queue.length > 0 && !this.buffer.updating) {
+            this.buffer.appendBuffer(this.queue.shift());
+        }
+    }
+
+    initWS(uid) {
+      console.log('initialising web socket for - ' + uid);
+      var _this = this;
+      this.ws = new WebSocket('ws://' + window.location.hostname + ':' + 
+              window.location.port + '/channel/'+uid, 'echo-protocol');
+      this.ws.binaryType = "arraybuffer";
+
+      this.ws.onopen = function(){
+          console.info('WebSocket connection initialized');
+      };
+
+      this.ws.onmessage = function (event) {
+          console.info('Recived WS message.', event);
+
+          if(typeof event.data === 'object'){
+              if (_this.buffer.updating || _this.queue.length > 0) {
+                  console.info('Pushing to queue.');
+                  _this.queue.push(event.data);
+              } else {
+                  console.info('Appending to buffer.');
+                  _this.buffer.appendBuffer(event.data);
+                  _this.audio.play();
+              }
+          }
+      };
+      this.ws.onclose = function(){ console.info('WebSocket connection closed') }
+    }
+
+    closeWS()
+    {
+        this.ws.close();
+    }
+    
+    sourceBufferHandle(uid) {
+        console.log("Handling source buffer" + this.currentUid);
+        console.log("Handling source buffer - input UID: " + uid);
+        this.buffer = this.mediaSource.addSourceBuffer(this.codecString);
+        this.buffer.mode = 'sequence';
+
+        console.log('adding sourceBufferHandle');
+        var _this = this
+        this.buffer.addEventListener('update', function() { // Note: Have tried 'updateend'
+            console.log('update');
+            _this.updateBuffer();
+        });
+
+        this.buffer.addEventListener('updateend', function() {
+            console.log('updateend');
+            _this.updateBuffer();
+        });
+
+        this.initWS(this.currentUid);
     }
 
     play (uid) {
       console.log("Opening stream: "+uid);
       this.currentUid = uid;
-      mediaSource.addEventListener('sourceopen', this.sourceBufferHandle);
+      this.mediaSource.addEventListener('sourceopen', this.sourceBufferHandle(uid));
       console.log("Source open listener added");
 //      this.audio = new window.Audio(`/${uid}`);
 //      this.audio.play();
     }
 
     stop () {
-      this.audio.pause();
-      this.audio.src = '';
+      
+      this.closeWS();
+//      this.audio.src = '';
+//      this.audio.pause();
       //this.audio.currentTime = 0;
     }
   }
@@ -187,7 +201,7 @@ queue = [];
   }
 
   const ui = new UI();
-
+  
   // make app run when dom is ready
   window.document.addEventListener('DOMContentLoaded', event => {
     ui.init();

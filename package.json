@@ -17,6 +17,7 @@
   "dependencies": {
     "crypto": "^1.0.1",
     "express": "^4.14.0",
+    "pug": "^2.0.0-rc.4",
     "url": "^0.11.0",
     "websocket": "^1.0.25"
   }

@@ -36,14 +36,16 @@ const hash = string => {
 
 var stream_configs = config.manager.streams;
 
+var stream_configs_hash = [];
 for(let i=0;i<stream_configs.length;i++)
 {
     channelWsClients[hash(stream_configs[i].source)]=[];
     channelFirstPacket[hash(stream_configs[i].source)] = [];
+    stream_configs_hash.push({
+        "name": stream_configs[i].name,
+        "uid": hash(stream_configs[i].source)
+    });
 }
-
-// Send static files with express
-app.use(express.static(options.root)); 
 
 /** All ws clients */
 var wsClients = [];
@@ -51,11 +53,23 @@ var wsClients = [];
 /** All ws clients */
 var tcpStreams = [];
 
+// Send static files with express
+//app.use(express.static(options.root)); 
+
+app.use('/static', express.static(path.join(__dirname, '../client/static')));
+
+app.set('view engine', 'pug');
+app.settings['x-powered-by'] = false;
+
 /**
  * Send index.html over http
  */
 app.get('/', function(req, res){
-  res.sendFile('index.html', options);
+    res.render('index', {
+        logo: config.logo || null,
+        streams: stream_configs_hash || []
+      });
+//  res.sendFile('index.html', options);
 });
 
 /** HTTP server */

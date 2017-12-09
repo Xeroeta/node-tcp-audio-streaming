@@ -62,14 +62,13 @@ app.set('view engine', 'pug');
 app.settings['x-powered-by'] = false;
 
 /**
- * Send index.html over http
+ * render and send index.pug over http
  */
 app.get('/', function(req, res){
     res.render('index', {
         logo: config.logo || null,
         streams: stream_configs_hash || []
       });
-//  res.sendFile('index.html', options);
 });
 
 /** HTTP server */

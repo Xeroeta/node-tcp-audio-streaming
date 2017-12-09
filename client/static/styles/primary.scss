@@ -1,0 +1,155 @@
+.hidden {
+  display: none;
+}
+
+:root {
+  background: #fafafa;
+  font-family: sans-serif;
+}
+
+.content {
+  position: relative;
+
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* alert message */
+.message {
+  background: #f33;
+  color: #fff;
+  position: fixed;
+  padding: 16px;
+  border-radius: 4px;
+  box-shadow: 0 0 16px rgba(1, 1, 1, 0.5);
+  opacity: 0.0;
+  z-index: 1;
+  transition: opacity 0.3s;
+  top: 0;
+  left: 0;
+  margin: 16px;
+
+  &::after {
+    content: 'Dismiss';
+    cursor: pointer;
+    text-decoration: underline;
+    padding-left: 10px;
+  }
+
+  &.message_visible {
+    opacity: 1.0;
+  }
+}
+
+/* position the logo and cover it with an overlay */
+.logo {
+  position: relative;
+
+  margin-top: 8px;
+
+  text-align: center;
+
+  .logo__image {
+    max-width: 100%;
+    max-height: 100%;
+
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .logo__overlay {
+    position: absolute;
+
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* grid containing the streams */
+.streams {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 8px;
+  margin: 8px 0;
+}
+
+/* single stream container */
+.stream {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 16px #eee;
+  overflow: hidden;
+  line-height: 64px;
+  position: relative;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+
+  &:hover {
+    box-shadow: 0 0 32px #ccc;
+  }
+
+  /* stream state area on the left */
+  &::before {
+    content: '\25b6'; /* play icon */
+    display: inline-block;
+    position: absolute;
+
+    background: #ccc;
+    color: #fff;
+
+    font-size: xx-large;
+    text-align: center;
+    text-shadow: 0 1px #aaa;
+    width: 64px;
+
+    transition: background 0.15s, color 0.15s, text-shadow 0.15s;
+  }
+
+  /* change icon depending on stream state */
+  &.stream_playing::before {
+    content: '\25fc\fe0e'; /* stop icon */
+  }
+  &.stream_buffering::before {
+    content: '\231b\fe0e'; /* buffering icon */
+  }
+
+  /* different color open streams */
+  &.stream_playing::before, &.stream_buffering::before {
+    background: #fc0;
+    color: #fff;
+
+    text-shadow: 0 1px #eb0;
+  }
+
+  /* stream name */
+  &::after {
+    content: attr(data-name);
+
+    margin-left: 64px;
+    padding: 16px;
+  }
+}
+
+/* credits */
+.credits, .credits__link {
+  font-size: xx-small;
+  text-align: center;
+  color: #888;
+}
+
+.credits__link {
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* make responsive on mobile devices */
+@media (max-width: 425px) {
+  .streams {
+    grid-template-columns: auto;
+  }
+}

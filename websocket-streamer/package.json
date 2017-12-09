@@ -1,7 +1,7 @@
 {
-  "name": "audio-stream",
+  "name": "websocket-streamer",
   "version": "0.0.1",
-  "description": "Stream audio through Node.js backend to web frontend.",
+  "description": "Stream audio through Node.js backend to localhost tcp ports - Modified from Alexandre's original code.",
   "scripts": {
     "clean": "rm -r -f build",
     "build-babel": "babel source -d build --no-babelrc --presets=env,minify --source-maps",

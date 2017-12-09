@@ -47,4 +47,4 @@ node index.js config.json
 
 According to audio / video codec set `codecString` in `client/static/scripts/primary.js` line `23` to right value.
 
-You can customize HTTP port in `server\app.js` line `14`. 
+You can customize HTTP port in `websocket-streamer\config.json` at line 59. 

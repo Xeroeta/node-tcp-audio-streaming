@@ -55,6 +55,7 @@
     ]
   },
   "server": {
-    "logo": "https://htcx.co/assets/images/global/logo.svg"
+    "logo": "https://htcx.co/assets/images/global/logo.svg",
+    "httpPort": 8080
   }
 }

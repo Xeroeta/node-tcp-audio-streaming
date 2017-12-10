@@ -21,13 +21,12 @@ const hash = string => {
 const preset = (source, encoding) => {
   return ffmpeg( {source: source, logger: {debug: log, info: log, warn: log, error: log}})
     .native()
-//    .format(encoding.format)
-.format('flv')
+    .format(encoding.format)
     .audioBitrate(encoding.bitrate)
     .inputOptions(encoding.inputOptions)
     .outputOptions(encoding.outputOptions);
 }
-//mp4a.40.2
+
 // manages a stream output
 class Output extends stream.Duplex {
   _write (chunk, encoding, callback) {
@@ -51,8 +50,6 @@ class Stream {
     this.encoder = null;
     this.output = null;
     this.connections = 0;
-
-    console.log("Inside Stream constructor!!!");
     
     this.initialise();
   }
@@ -101,7 +98,8 @@ class Stream {
 
   // pause process if not actively requested
   update () {
-    console.log(`${this.connections} user(s) connected to '${this.name}'`);
+      //`${this.connections} receiving server connected to '${this.name}'`
+    console.log(`Receiving server connected to '${this.name}'`);
 
     // pause processes when not used, causes problems with http streams
     if (this.connections > 0) {
